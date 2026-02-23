@@ -17,6 +17,7 @@ export default function Navbar() {
   const [activeLink, setActiveLink] = useState("");
   const [platformDropdownOpen, setPlatformDropdownOpen] = useState(false);
   const [hoveredPlatformItem, setHoveredPlatformItem] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const pathname = usePathname();
   const isHome = pathname === "/";
 
@@ -42,9 +43,18 @@ export default function Navbar() {
     setMobileOpen(false);
   };
 
+  // Update active link based on scroll position
   useEffect(() => {
     const handleScroll = () => {
       if (!isHome) return;
+      
+      // Calculate scroll progress
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      setScrollProgress(scrolled);
+      
+      // Update active section
       const sections = NAV_LINKS.map(l => l.href.replace("#", ""));
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -57,6 +67,7 @@ export default function Navbar() {
         }
       }
     };
+    
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHome]);
@@ -291,7 +302,7 @@ export default function Navbar() {
           <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
           <div className="relative z-10 transition-transform duration-500 group-hover:scale-110">
             {mobileOpen ? 
-              <X size={22} className="text-white animate-spin-once" /> : 
+              <X size={22} className="text-white" /> : 
               <Menu size={22} className="text-white" />
             }
           </div>
@@ -411,13 +422,16 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Enhanced scroll progress bar */}
-      {scrolled && (
-        <div className="fixed top-[80px] left-0 right-0 h-[2px] z-50 overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-coral via-violet to-lavender animate-shimmer" 
-               style={{ width: "30%", backgroundSize: "200% 100%" }} />
-        </div>
-      )}
+      {/* Fixed Scroll Progress Bar - Now tracks actual scroll position */}
+      <div className="fixed top-[80px] left-0 right-0 h-[2px] z-50 overflow-hidden bg-white/5">
+        <div 
+          className="h-full bg-gradient-to-r from-coral via-violet to-lavender transition-all duration-300 ease-out"
+          style={{ 
+            width: `${scrollProgress}%`,
+            boxShadow: "0 0 10px rgba(139, 92, 246, 0.5), 0 0 20px rgba(236, 72, 153, 0.3)"
+          }}
+        />
+      </div>
     </>
   );
 }
